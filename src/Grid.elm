@@ -1,20 +1,20 @@
 module Grid exposing
   ( repeatCell
-  , getCell
-  , rows, columns, cells
+  , width, height, numCells
+  , rows, columns, cells, getCell
   )
--- only expose what is needed
 
 import Cell as C
 import Array as A
 
 -- This is hidden 
--- x y 1D array Cell (as 2d array)
 type alias Grid =
   { width : Int
   , height : Int
   , cells : (A.Array C.Cell)
   }
+
+-- Initialization
 
 repeatCell : Int -> Int -> C.Cell -> Grid
 repeatCell inWidth inHeight copyCell =
@@ -23,12 +23,21 @@ repeatCell inWidth inHeight copyCell =
   , cells = (A.repeat (inWidth*inHeight) copyCell)
   }
 
-getCell : Int -> Int -> Grid -> Maybe C.Cell
-getCell x y inGrid =
-  let
-    index = (x * inGrid.width) + y
-  in
-    A.get (index) inGrid.cells
+-- Access Simple Info
+
+width : Grid -> Int
+width inGrid =
+  inGrid.width
+
+height : Grid -> Int
+height inGrid =
+  inGrid.height
+
+numCells : Grid -> Int --better name???
+numCells inGrid =
+  inGrid.width * inGrid.height
+
+-- Accessing Cells
 
 rows : Grid -> A.Array (A.Array C.Cell)
 rows inGrid =
@@ -39,6 +48,8 @@ rows inGrid =
   in 
     A.map (\x -> sepRows x inGrid.cells) useArray 
 
+
+--THIS DOESN'T WORK YOU DUMMY
 columns : Grid -> A.Array (A.Array C.Cell)
 columns inGrid = 
   let
@@ -51,3 +62,11 @@ columns inGrid =
 cells : Grid -> A.Array C.Cell
 cells inGrid =
   inGrid.cells
+
+
+getCell : Int -> Int -> Grid -> Maybe C.Cell
+getCell x y inGrid =
+  let
+    index = (x * inGrid.width) + y
+  in
+    A.get (index) inGrid.cells
