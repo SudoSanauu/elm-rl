@@ -1,9 +1,7 @@
 module Grid exposing
-  ( makeGrid
-  , repeatCell
-  , rows
-  , columns
-  , cells
+  ( repeatCell
+  , getCell
+  , rows, columns, cells
   )
 -- only expose what is needed
 
@@ -18,15 +16,15 @@ type alias Grid =
   , cells : (A.Array C.Cell)
   }
 
-makeGrid : Int -> Int -> C.Cell -> Grid
-makeGrid inWidth inHeight copyCell =
+repeatCell : Int -> Int -> C.Cell -> Grid
+repeatCell inWidth inHeight copyCell =
   { width = inWidth
   , height = inHeight
   , cells = (A.repeat (inWidth*inHeight) copyCell)
   }
 
-repeatCell : Int -> Int -> Grid -> Maybe C.Cell
-repeatCell x y inGrid =
+getCell : Int -> Int -> Grid -> Maybe C.Cell
+getCell x y inGrid =
   let
     index = (x * inGrid.width) + y
   in
