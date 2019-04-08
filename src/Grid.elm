@@ -2,12 +2,13 @@ module Grid exposing
   ( repeatCell
   , width, height, numCells
   , rows, columns, cells, getCell
+  , validDimension
   )
 
 import Cell as C
 import Array as A
 
--- This is hidden 
+-- Hidden Type 
 type alias Grid =
   { width : Int
   , height : Int
@@ -70,3 +71,16 @@ getCell x y inGrid =
     index = (x * inGrid.width) + y
   in
     A.get (index) inGrid.cells
+
+
+
+-- Helper
+validDimension : Int -> Int -> A.Array a -> Bool
+validDimension w h arr =
+  let
+    pos = (w >= 0) && (h >= 0)
+    len = A.length arr
+    div = ((len) // h) == w
+    mod = (modBy h (len) == 0)
+  in
+    pos && (div && mod)
