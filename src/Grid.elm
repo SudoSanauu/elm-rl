@@ -3,6 +3,8 @@ module Grid exposing
   , width, height, numCells
   , rows, columns, cells, getCell
   , validDimension
+  , Grid --TEMPORARY, NEED TO FIGURE OUT HOW TO DO OBFUSCATED TYPES FOR REALZIES
+  , helloGrid
   )
 
 import Cell as C
@@ -100,8 +102,18 @@ validDimension : Int -> Int -> A.Array a -> Bool
 validDimension w h arr =
   let
     pos = (w >= 0) && (h >= 0)
-    len = A.length arr
-    div = ((len) // h) == w
-    mod = (modBy h (len) == 0)
+    correctLen = w * h == A.length arr
   in
-    pos && (div && mod)
+    pos && correctLen
+
+
+-- Grid Consts
+helloGrid : Grid
+helloGrid =
+  let
+    genCell = C.genericCell
+    basicSym sym = { genCell | symbol = sym }
+    helloArr = A.fromList ['H','e','l','l','o',' ','W','o','r','l','d','!']
+    helloCellArr = A.map basicSym helloArr
+  in
+    { width = 12, height = 1, cells = helloCellArr }
