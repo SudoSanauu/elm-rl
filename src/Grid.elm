@@ -1,6 +1,6 @@
 module Grid exposing
   ( makeGrid
-  , accessCell
+  , repeatCell
   , rows
   , columns
   , cells
@@ -25,8 +25,8 @@ makeGrid inWidth inHeight copyCell =
   , cells = (A.repeat (inWidth*inHeight) copyCell)
   }
 
-accessCell : Int -> Int -> Grid -> Maybe C.Cell
-accessCell x y inGrid =
+repeatCell : Int -> Int -> Grid -> Maybe C.Cell
+repeatCell x y inGrid =
   let
     index = (x * inGrid.width) + y
   in
