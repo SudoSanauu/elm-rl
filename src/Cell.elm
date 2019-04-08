@@ -1,4 +1,4 @@
-module Cell exposing (..) 
+module Cell exposing (Cell, genericCell) 
 -- at end only expose what needs exposing
 import Color as C
 

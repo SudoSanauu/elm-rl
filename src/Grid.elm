@@ -24,6 +24,27 @@ repeatCell inWidth inHeight copyCell =
   , cells = (A.repeat (inWidth*inHeight) copyCell)
   }
 
+
+-- TO IMPLIMENT
+fromRows : A.Array (A.Array C.Cell) -> Maybe Grid
+fromRows arr =
+  Nothing
+
+fromCols : A.Array (A.Array C.Cell) -> Maybe Grid
+fromCols arr =
+  Nothing
+
+fromCells : Int -> Int -> A.Array C.Cell -> Maybe Grid
+fromCells w h arr =
+  if validDimension w h arr then
+    Just
+      { width = w
+      , height = h
+      , cells = arr
+      }
+  else
+    Nothing
+
 -- Access Simple Info
 
 width : Grid -> Int
