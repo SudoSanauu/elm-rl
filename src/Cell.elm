@@ -8,3 +8,10 @@ type alias Cell =
   , symbolColor : C.Color
   , backgroundColor : C.Color
   }
+
+genericCell : Cell 
+genericCell =
+  { symbol = '.'
+  , symbolColor = C.white
+  , backgroundColor = C.black
+  }
