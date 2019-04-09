@@ -27,11 +27,24 @@ repeatCell inWidth inHeight copyCell =
   }
 
 
--- TO IMPLIMENT
 fromRows : A.Array (A.Array C.Cell) -> Maybe Grid
 fromRows arr =
-  Nothing
+  let 
+    h = A.length arr
+    firstLen = A.length (Maybe.withDefault A.empty (A.get 0 arr))
+    sameLen = A.foldr (\x -> (&&) (A.length x == firstLen)) True arr
+    valid = (firstLen > 0) && (h > 0) && sameLen 
+  in
+    if valid then
+      Just
+        { width = firstLen
+        , height = h
+        , cells = (A.foldr (A.append) A.empty arr)
+        }
+    else
+      Nothing
 
+-- TO IMPLIMENT
 fromCols : A.Array (A.Array C.Cell) -> Maybe Grid
 fromCols arr =
   Nothing
