@@ -1,5 +1,5 @@
 import Browser
-import Html exposing (Html, button, div, text)
+import Html exposing (Html, button, div, text, td, tr, table)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing (style)
 
@@ -42,9 +42,10 @@ cellView inputCell =
 
 cellDisplay : Ce.Cell -> Html msg
 cellDisplay inputCell =
-  div
-  [ style "width" "100px"
-  , style "height" "100px"
+  td
+  [ style "width" "20px"
+  , style "height" "20px"
+  , style "text-align" "center"
   , style "font-family" "monospace"
   , style "background-color" (Co.toCssString inputCell.backgroundColor)
   , style "color" (Co.toCssString inputCell.symbolColor)
@@ -55,7 +56,8 @@ cellDisplay inputCell =
 gridDisplay : G.Grid -> Html msg
 gridDisplay inGrid =
   let
-    cellList = A.toList inGrid.cells
-    cellsHtml = List.map cellDisplay cellList
+    rowList = A.toList (A.map A.toList (G.rows inGrid))
+    rowToTr inRow = tr [] (List.map cellDisplay inRow)
+    rowsAsHtml = List.map rowToTr rowList
   in
-    div [] cellsHtml
+    table [] rowsAsHtml

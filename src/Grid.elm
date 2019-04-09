@@ -116,4 +116,4 @@ helloGrid =
     helloArr = A.fromList ['H','e','l','l','o',' ','W','o','r','l','d','!']
     helloCellArr = A.map basicSym helloArr
   in
-    { width = 12, height = 1, cells = helloCellArr }
+    { width = 6, height = 2, cells = helloCellArr }
