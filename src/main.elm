@@ -37,7 +37,7 @@ cellView inputCell =
     [ text ("Symbol: " ++ (String.fromChar inputCell.symbol))
     , text (" Symbol Color: " ++ (Co.toCssString inputCell.symbolColor))
     , text (" Background Color: " ++ (Co.toCssString inputCell.backgroundColor))
-    , gridDisplay G.helloGrid
+    , gridDisplay testHello
     ]
 
 cellDisplay : Ce.Cell -> Html msg
@@ -52,7 +52,6 @@ cellDisplay inputCell =
   ]
   [ text (String.fromChar inputCell.symbol) ]
 
--- ONLY WORKS WITH HEIGHT 1 GRID RN, NEED TO CHANGE
 gridDisplay : G.Grid -> Html msg
 gridDisplay inGrid =
   let
@@ -61,3 +60,12 @@ gridDisplay inGrid =
     rowsAsHtml = List.map rowToTr rowList
   in
     table [] rowsAsHtml
+
+testHello : G.Grid
+testHello =
+  Maybe.withDefault
+    { width = 1
+    , height = 1
+    , cells = A.fromList [Ce.genericCell]
+    }
+    (G.fromCols (G.columns (G.helloGrid)))  

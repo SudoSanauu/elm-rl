@@ -2,6 +2,7 @@ module Grid exposing
   ( repeatCell
   , width, height, numCells
   , rows, columns, cells, getCell
+  , fromRows, fromCols, fromCells
   , validDimension
   , Grid --TEMPORARY, NEED TO FIGURE OUT HOW TO DO OBFUSCATED TYPES FOR REALZIES
   , helloGrid
@@ -44,10 +45,29 @@ fromRows arr =
     else
       Nothing
 
--- TO IMPLIMENT
 fromCols : A.Array (A.Array C.Cell) -> Maybe Grid
-fromCols arr =
-  Nothing
+fromCols inputArr =
+  let
+    w = A.length inputArr
+    firstLen = A.length (Maybe.withDefault A.empty (A.get 0 inputArr))
+    sameLen = A.foldr (\x -> (&&) (A.length x == firstLen)) True inputArr
+    valid = (firstLen > 0) && (w > 0) && sameLen
+  in
+    if valid then
+      let
+        indexArr = A.initialize firstLen identity
+        safeArrGet i arr = Maybe.withDefault C.genericCell (A.get i arr)
+        getAllI i = A.map (safeArrGet i) inputArr
+        rowArr = A.map getAllI indexArr
+        cellArr = A.foldr (A.append) A.empty rowArr
+      in
+        Just
+        { width = w
+        , height = firstLen
+        , cells = cellArr
+        }
+    else
+      Nothing
 
 fromCells : Int -> Int -> A.Array C.Cell -> Maybe Grid
 fromCells w h arr =
@@ -86,19 +106,17 @@ rows inGrid =
     A.map (\x -> sepRows x inGrid.cells) useArray 
 
 
---THIS DOESN'T WORK YOU DUMMY
 columns : Grid -> A.Array (A.Array C.Cell)
 columns inGrid = 
   let
-    sepCols colNum array =
-      A.slice (colNum * inGrid.height) ((colNum+1) * inGrid.width) array
-    useArray = A.initialize inGrid.width identity
+    colNums = A.initialize inGrid.width identity
+    colNumToIndexes num =
+      A.initialize inGrid.height (\x -> x * inGrid.width + num)
+    colsIndexs = A.map colNumToIndexes colNums
+    indexesToCells iArr =
+      A.map (\x -> safeGet x inGrid) iArr
   in
-    A.map (\x -> sepCols x inGrid.cells) useArray
-
-cells : Grid -> A.Array C.Cell
-cells inGrid =
-  inGrid.cells
+    A.map indexesToCells colsIndexs
 
 
 getCell : Int -> Int -> Grid -> Maybe C.Cell
@@ -107,6 +125,10 @@ getCell x y inGrid =
     index = (x * inGrid.width) + y
   in
     A.get (index) inGrid.cells
+
+cells : Grid -> A.Array C.Cell
+cells inGrid =
+  inGrid.cells
 
 
 
@@ -130,3 +152,10 @@ helloGrid =
     helloCellArr = A.map basicSym helloArr
   in
     { width = 6, height = 2, cells = helloCellArr }
+
+-- HELPER FUNCTIONS
+
+-- use only when we don't need to use default, since we do type safety on Grid
+safeGet : Int -> Grid -> C.Cell
+safeGet index inGrid =
+  Maybe.withDefault C.genericCell (A.get index inGrid.cells)
