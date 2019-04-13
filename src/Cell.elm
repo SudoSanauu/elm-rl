@@ -1,17 +1,18 @@
-module Cell exposing (Cell, genericCell) 
--- at end only expose what needs exposing
+module Cell exposing (Cell, genericCell)
+
 import Color as C
 
 
 type alias Cell =
-  { symbol : Char
-  , symbolColor : C.Color
-  , backgroundColor : C.Color
-  }
+    { symbol : Char
+    , symbolColor : C.Color
+    , backgroundColor : C.Color
+    }
 
-genericCell : Cell 
+
+genericCell : Cell
 genericCell =
-  { symbol = '.'
-  , symbolColor = C.white
-  , backgroundColor = C.black
-  }
+    { symbol = '.'
+    , symbolColor = C.white
+    , backgroundColor = C.black
+    }
