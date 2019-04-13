@@ -63,9 +63,17 @@ gridDisplay inGrid =
 
 testHello : G.Grid
 testHello =
-  Maybe.withDefault
-    { width = 1
-    , height = 1
-    , cells = A.fromList [Ce.genericCell]
-    }
-    (G.fromCols (G.columns (G.helloGrid)))  
+  let
+    genericGrid = 
+      { width = 1
+      , height = 1
+      , cells = A.fromList [Ce.genericCell]
+      }
+    stack = 
+      Maybe.withDefault
+        genericGrid
+        (G.combineVert G.helloGrid G.helloGrid)
+  in
+    Maybe.withDefault
+      genericGrid
+      (G.combineHor stack stack)

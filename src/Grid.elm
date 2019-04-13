@@ -4,6 +4,7 @@ module Grid exposing
   , rows, columns, cells, getCell
   , fromRows, fromCols, fromCells
   , validDimension
+  , combineHor, combineVert
   , Grid --TEMPORARY, NEED TO FIGURE OUT HOW TO DO OBFUSCATED TYPES FOR REALZIES
   , helloGrid
   )
@@ -142,13 +143,50 @@ validDimension w h arr =
     pos && correctLen
 
 
+combineVert : Grid -> Grid -> Maybe Grid
+combineVert topGrid btmGrid =
+  if topGrid.width == btmGrid.width then
+    Just 
+      { height = topGrid.height + btmGrid.height
+      , width = topGrid.width
+      , cells = A.append topGrid.cells btmGrid.cells
+      }
+  else
+    Nothing
+
+combineHor : Grid -> Grid -> Maybe Grid
+combineHor leftGrid rightGrid =
+  if leftGrid.height == rightGrid.height then
+    let
+      leftRows = rows leftGrid
+      rightRows = rows rightGrid
+      safeGetArr i arr = Maybe.withDefault A.empty (A.get i arr)
+      combineAtI i =
+        A.append (safeGetArr i leftRows) (safeGetArr i rightRows)
+      combinedRows =
+        A.map (combineAtI) (A.initialize leftGrid.height identity)
+      combinedCells =
+        A.foldr (A.append) A.empty combinedRows
+    in
+      Just
+        { height = leftGrid.height
+        , width = leftGrid.width + rightGrid.width
+        , cells = combinedCells
+        }
+  else
+    Nothing
+
 -- Grid Consts
 helloGrid : Grid
 helloGrid =
   let
     genCell = C.genericCell
     basicSym sym = { genCell | symbol = sym }
-    helloArr = A.fromList ['H','e','l','l','o',' ','W','o','r','l','d','!']
+    helloArr = 
+      A.fromList 
+      ['H','e','l','l','o',' '
+      ,'W','o','r','l','d','!'
+      ]
     helloCellArr = A.map basicSym helloArr
   in
     { width = 6, height = 2, cells = helloCellArr }
