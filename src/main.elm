@@ -96,10 +96,16 @@ gridDisplay inGrid =
 testHello : Grid
 testHello =
     let
+        genCell =
+            Ce.genericCell
+
+        genCellRed = 
+            { genCell | symbolColor = Co.red }
+            
         errorGrid =
             G.insertString 0 0
                 "ERROR: failed to init test Grid"
-                (G.repeatCell 12 4 Ce.genericCell)
+                (G.repeatCell 12 4 genCellRed)
 
         stack =
             Maybe.withDefault

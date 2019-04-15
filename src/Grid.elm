@@ -359,20 +359,23 @@ insertHelper x y currWord inWords inGrid =
                 case inWords of
                     [] ->
                         setWord
-                            ( (y * g.width) + x )
+                            ((y * g.width) + x)
                             currWord
                             inGrid
 
                     [ last ] ->
                         if currWord == "" then
-                            insertHelper x y last [] inGrid
+                            insertHelper
+                                x y
+                                last []
+                                inGrid
 
                         else if
                             x+1 + length currWord + length last <= g.width
                         then
                             setWord
-                                ( (y * g.width) + x )
-                                ( currWord ++ " " ++ last )
+                                ((y * g.width) + x)
+                                (currWord ++ " " ++ last)
                                 inGrid
 
                         else
@@ -387,7 +390,10 @@ insertHelper x y currWord inWords inGrid =
 
                     first :: rest ->
                         if currWord == "" then
-                            insertHelper x y first rest inGrid
+                            insertHelper
+                                x y
+                                first rest
+                                inGrid
 
                         else if
                             x+1 + length currWord + length first <= g.width
@@ -401,7 +407,7 @@ insertHelper x y currWord inWords inGrid =
                             insertHelper
                                 0 (y + 1)
                                 first rest
-                                ( setWord
+                                (setWord
                                     ((y * g.width) + x)
                                     currWord
                                     inGrid
@@ -436,7 +442,8 @@ setWord index word inGrid =
                         inChar :: rest ->
                             let
                                 currCell =
-                                    Maybe.withDefault C.genericCell
+                                    Maybe.withDefault
+                                        C.genericCell
                                         (A.get i inArr)
 
                                 newCell =
