@@ -2,9 +2,9 @@ module Main exposing (..)
 
 import Array as A
 import Browser
-import Cell as Ce
+import Cell as Ce exposing (Cell)
 import Color as Co
-import Grid as G
+import Grid as G exposing (Grid)
 import Html exposing (Html, button, div, table, td, text, tr)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
@@ -20,7 +20,7 @@ inital =
 
 type alias Model = 
     { val : Int
-    , gridThing : G.Grid
+    , gridThing : Grid
     }
 
 type Msg
@@ -50,7 +50,7 @@ view model =
 -- temp for testing
 
 
-cellView : Ce.Cell -> Model -> Html msg
+cellView : Cell -> Model -> Html msg
 cellView inputCell model=
     div []
         [ text ("Symbol: " ++ String.fromChar inputCell.symbol)
@@ -58,14 +58,14 @@ cellView inputCell model=
         , text (" Background Color: " ++ Co.toCssString inputCell.backgroundColor)
         , gridDisplay testHello
         , text (
-            "width = " ++ String.fromInt model.gridThing.width ++ 
-            " height = " ++ String.fromInt model.gridThing.height
+            "width = " ++ String.fromInt (G.width model.gridThing) ++ 
+            " height = " ++ String.fromInt (G.height model.gridThing)
         )
         , gridDisplay model.gridThing
         ]
 
 
-cellDisplay : Ce.Cell -> Html msg
+cellDisplay : Cell -> Html msg
 cellDisplay inputCell =
     td
         [ style "width" "20px"
@@ -78,7 +78,7 @@ cellDisplay inputCell =
         [ text (String.fromChar inputCell.symbol) ]
 
 
-gridDisplay : G.Grid -> Html msg
+gridDisplay : Grid -> Html msg
 gridDisplay inGrid =
     let
         rowList =
@@ -93,7 +93,7 @@ gridDisplay inGrid =
     table [] rowsAsHtml
 
 
-testHello : G.Grid
+testHello : Grid
 testHello =
     let
         errorGrid =
