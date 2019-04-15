@@ -1,12 +1,11 @@
 module Grid exposing
-    ( repeatCell
+    ( Grid
+    , repeatCell , fromRows, fromCols, fromCells
     , width, height, numCells
     , rows, columns, cells, getCell
-    , fromRows, fromCols, fromCells
     , validDimension
     , combineHor, combineVert
     , setCell, insertString
-    , Grid
     , helloGrid
     )
 
