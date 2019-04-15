@@ -97,13 +97,13 @@ fromCols inputArr =
             cellArr =
                 A.foldr A.append A.empty rowArr
         in
-        Just (
-            Grid
+        Just
+            (Grid
                 { width = w
                 , height = firstLen
                 , cells = cellArr
                 }
-        )
+            )
 
     else
         Nothing
@@ -112,13 +112,13 @@ fromCols inputArr =
 fromCells : Int -> Int -> A.Array C.Cell -> Maybe Grid
 fromCells w h arr =
     if validDimension w h arr then
-        Just (
-            Grid
+        Just
+            (Grid
                 { width = w
                 , height = h
                 , cells = arr
                 }
-        )
+            )
 
     else
         Nothing
@@ -130,19 +130,23 @@ fromCells w h arr =
 
 width : Grid -> Int
 width inGrid =
-    case inGrid of 
-        Grid g -> g.width
+    case inGrid of
+        Grid g ->
+            g.width
 
 
 height : Grid -> Int
 height inGrid =
-    case inGrid of 
-        Grid g -> g.height
+    case inGrid of
+        Grid g ->
+            g.height
 
 
-numCells : Grid -> Int --better name???
+numCells :
+    Grid
+    -> Int --better name???
 numCells inGrid =
-    case inGrid of 
+    case inGrid of
         Grid g ->
             g.width * g.height
 
@@ -219,21 +223,22 @@ validDimension w h arr =
     pos && correctLen
 
 
+
 -- Combiner Functions
 
 
 combineVert : Grid -> Grid -> Maybe Grid
 combineVert topGrid btmGrid =
-    case (topGrid, btmGrid) of 
-        (Grid topG, Grid btmG) ->
+    case ( topGrid, btmGrid ) of
+        ( Grid topG, Grid btmG ) ->
             if topG.width == btmG.width then
-                Just (
-                    Grid
+                Just
+                    (Grid
                         { height = topG.height + btmG.height
                         , width = topG.width
                         , cells = A.append topG.cells btmG.cells
                         }
-                )
+                    )
 
             else
                 Nothing
@@ -241,8 +246,8 @@ combineVert topGrid btmGrid =
 
 combineHor : Grid -> Grid -> Maybe Grid
 combineHor leftGrid rightGrid =
-    case (leftGrid, rightGrid) of
-        (Grid leftG, Grid rightG) ->
+    case ( leftGrid, rightGrid ) of
+        ( Grid leftG, Grid rightG ) ->
             if leftG.height == rightG.height then
                 let
                     leftRows =
@@ -280,6 +285,7 @@ combineHor leftGrid rightGrid =
 
 -- Grid Modifier
 
+
 setCell : Int -> Int -> C.Cell -> Grid -> Grid
 setCell x y inCell inGrid =
     case inGrid of 
@@ -289,7 +295,8 @@ setCell x y inCell inGrid =
                     index =
                         (y * g.width) + x
 
-                    newCells = A.set index inCell g.cells
+                    newCells =
+                        A.set index inCell g.cells
                 in
                 Grid { g | cells = newCells }
             
@@ -340,6 +347,7 @@ safeGet index inGrid =
         Grid g ->
             Maybe.withDefault C.genericCell (A.get index g.cells)
 
+
 insertHelper : Int -> Int -> String -> List String -> Grid -> Grid
 insertHelper x y currWord inWords inGrid =
     case inGrid of 
@@ -354,19 +362,25 @@ insertHelper x y currWord inWords inGrid =
                             ( (y * g.width) + x )
                             currWord
                             inGrid
+
                     [ last ] ->
                         if currWord == "" then
                             insertHelper x y last [] inGrid
-                        else if x+1 + length currWord + length last <= g.width then
+
+                        else if
+                            x+1 + length currWord + length last <= g.width
+                        then
                             setWord
                                 ( (y * g.width) + x )
                                 ( currWord ++ " " ++ last )
                                 inGrid
 
                         else
-                            insertHelper 0 (y+1) last []
-                                ( setWord
-                                    ( (y * g.width) + x )
+                            insertHelper
+                                0 (y+1)
+                                last []
+                                (setWord
+                                    ((y * g.width) + x)
                                     currWord
                                     inGrid
                                 )
@@ -374,24 +388,27 @@ insertHelper x y currWord inWords inGrid =
                     first :: rest ->
                         if currWord == "" then
                             insertHelper x y first rest inGrid
-                        else if x+1 + 
-                            length currWord + length first <= g.width then
-                            insertHelper x y ( currWord ++ " " ++ first ) rest inGrid
+
+                        else if
+                            x+1 + length currWord + length first <= g.width
+                        then
+                            insertHelper
+                                x y
+                                (currWord ++ " " ++ first) rest
+                                inGrid
 
                         else
                             insertHelper
-                                0
-                                (y + 1)
-                                first
-                                rest
+                                0 (y + 1)
+                                first rest
                                 ( setWord
-                                    ( (y * g.width) + x )
+                                    ((y * g.width) + x)
                                     currWord
                                     inGrid
                                 )
 
             else
-                insertHelper 0 (y+1) currWord inWords inGrid
+                insertHelper 0 (y + 1) currWord inWords inGrid
 
 
 setWord : Int -> String -> Grid -> Grid
@@ -408,7 +425,7 @@ setWord index word inGrid =
                 writeArr =
                     A.slice
                         index
-                        ( index + List.length writeList )
+                        (index + List.length writeList)
                         g.cells
 
                 writeCellsHelper i inArr inList = 
@@ -428,18 +445,17 @@ setWord index word inGrid =
                                 newArr = 
                                     A.set i newCell inArr
                             in
-                            writeCellsHelper (i+1) newArr rest
+                            writeCellsHelper (i + 1) newArr rest
 
                 writeCells =
                     writeCellsHelper 0 writeArr writeList
 
                 endCells =
                     A.slice 
-                        ( index + List.length writeList )
-                        ( g.width * g.height )
+                        (index + List.length writeList)
+                        (g.width * g.height)
                         g.cells
+
+                newCells = A.append (A.append startCells writeCells) endCells
             in 
-            Grid 
-                { g 
-                | cells = A.append (A.append startCells writeCells) endCells
-                }   
+            Grid { g | cells = newCells }
