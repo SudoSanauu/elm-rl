@@ -5,13 +5,14 @@ module Grid exposing
     , fromRows, fromCols, fromCells
     , validDimension
     , combineHor, combineVert
-    , setCell
+    , setCell, insertString
     , Grid --TEMPORARY, NEED TO FIGURE OUT HOW TO DO OBFUSCATED TYPES FOR REALZIES
     , helloGrid
     )
 
 import Array as A
 import Cell as C
+import String as S
 
 
 
@@ -28,10 +29,10 @@ type alias Grid =
 
 
 repeatCell : Int -> Int -> C.Cell -> Grid
-repeatCell inWidth inHeight copyCell =
-    { width = inWidth
-    , height = inHeight
-    , cells = A.repeat (inWidth * inHeight) copyCell
+repeatCell w h copyCell =
+    { width = w
+    , height = h
+    , cells = A.repeat (w * h) copyCell
     }
 
 
@@ -264,6 +265,13 @@ setCell x y inCell inGrid =
     else
         inGrid
 
+
+insertString : Int -> Int -> String -> Grid -> Grid
+insertString x y inString inGrid =
+    insertHelper x y "" (S.words inString) inGrid
+
+
+
 -- Grid Consts
 
 
@@ -296,3 +304,129 @@ helloGrid =
 safeGet : Int -> Grid -> C.Cell
 safeGet index inGrid =
     Maybe.withDefault C.genericCell (A.get index inGrid.cells)
+
+insertHelper : Int -> Int -> String -> List String -> Grid -> Grid
+insertHelper x y currWord inWords inGrid =
+    if y >= inGrid.height then
+        inGrid
+
+    else if x + S.length currWord <= inGrid.width then
+        case inWords of
+            [] ->
+                setWord
+                    ( (y * inGrid.width) + x )
+                    currWord
+                    inGrid
+            [ last ] ->
+                if currWord == "" then
+                    insertHelper x y last [] inGrid
+                else if x+1 + S.length currWord + S.length last <= inGrid.width then
+                    setWord
+                        ( (y * inGrid.width) + x )
+                        ( currWord ++ " " ++ last )
+                        inGrid
+
+                else
+                    insertHelper 0 (y+1) last []
+                        ( setWord
+                            ( (y * inGrid.width) + x )
+                            currWord
+                            inGrid
+                        )
+
+            first :: rest ->
+                if currWord == "" then
+                    insertHelper x y first rest inGrid
+                else if x+1 + S.length currWord + S.length first <= inGrid.width then
+                    insertHelper x y ( currWord ++ " " ++ first ) rest inGrid
+
+                else
+                    insertHelper
+                        0
+                        (y + 1)
+                        first
+                        rest
+                        ( setWord
+                            ( (y * inGrid.width) + x )
+                            currWord
+                            inGrid
+                        )
+
+    else
+        insertHelper 0 (y+1) currWord inWords inGrid
+
+
+--insertHelper : Int -> Int -> List String -> Grid -> Grid
+--insertHelper x y inWords inGrid =
+--    if y >= inGrid.height then
+--        inGrid
+
+--    else
+--        case inWords of
+--            [] ->
+--                inGrid
+
+--            first :: rest ->
+--                if x + S.length first >= inGrid.width then
+--                    insertHelper 0 (y+1) inWords inGrid
+
+--                else
+--                    let
+--                        newGrid = 
+--                            setWord
+--                                ((y * inGrid.width) + x)
+--                                first
+--                                inGrid
+--                    in
+--                    insertHelper
+--                        (x + S.length first)
+--                        y
+--                        rest
+--                        newGrid
+                
+
+
+setWord : Int -> String -> Grid -> Grid
+setWord index word inGrid =
+    let
+        writeList =
+            S.toList word
+
+        startCells =
+            A.slice 0 index inGrid.cells
+
+        writeArr =
+            A.slice
+                index
+                ( index + List.length writeList )
+                inGrid.cells
+
+        writeCellsHelper : Int -> A.Array C.Cell -> List Char ->A.Array C.Cell
+        writeCellsHelper i inArr inList = 
+            case inList of
+                [] ->
+                    inArr
+
+                inChar :: rest ->
+                    let
+                        currCell =
+                            Maybe.withDefault C.genericCell (A.get i inArr)
+
+                        newCell =
+                            { currCell | symbol = inChar }
+
+                        newArr = 
+                            A.set i newCell inArr
+                    in
+                    writeCellsHelper (i+1) newArr rest
+
+        writeCells =
+            writeCellsHelper 0 writeArr writeList
+
+        endCells =
+            A.slice 
+                ( index + List.length writeList )
+                ( inGrid.width * inGrid.height )
+                inGrid.cells
+    in 
+    { inGrid | cells = A.append (A.append startCells writeCells) endCells }   

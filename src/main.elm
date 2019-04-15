@@ -11,8 +11,17 @@ import Html.Events exposing (onClick)
 
 
 main =
-    Browser.sandbox { init = 0, update = update, view = view }
+    Browser.sandbox { init = inital, update = update, view = view }
 
+inital =
+    { val = 0
+    , gridThing = (G.insertString 8 1 "12345678902 12 34 6780 1" testHello)
+    }
+
+type alias Model = 
+    { val : Int
+    , gridThing : G.Grid
+    }
 
 type Msg
     = Increment
@@ -22,18 +31,18 @@ type Msg
 update msg model =
     case msg of
         Increment ->
-            model + 1
+            { model | val = model.val + 1 }
 
         Decrement ->
-            model - 1
+            { model | val = model.val - 1 }
 
 
 view model =
     div []
         [ button [ onClick Decrement ] [ text "-" ]
-        , div [] [ text (String.fromInt model) ]
+        , div [] [ text (String.fromInt model.val) ]
         , button [ onClick Increment ] [ text "+" ]
-        , cellView Ce.genericCell
+        , cellView Ce.genericCell model
         ]
 
 
@@ -41,13 +50,18 @@ view model =
 -- temp for testing
 
 
-cellView : Ce.Cell -> Html msg
-cellView inputCell =
+cellView : Ce.Cell -> Model -> Html msg
+cellView inputCell model=
     div []
         [ text ("Symbol: " ++ String.fromChar inputCell.symbol)
         , text (" Symbol Color: " ++ Co.toCssString inputCell.symbolColor)
         , text (" Background Color: " ++ Co.toCssString inputCell.backgroundColor)
         , gridDisplay testHello
+        , text (
+            "width = " ++ String.fromInt model.gridThing.width ++ 
+            " height = " ++ String.fromInt model.gridThing.height
+        )
+        , gridDisplay model.gridThing
         ]
 
 
@@ -82,20 +96,19 @@ gridDisplay inGrid =
 testHello : G.Grid
 testHello =
     let
-        genericGrid =
-            { width = 1
-            , height = 1
-            , cells = A.fromList [ Ce.genericCell ]
-            }
+        errorGrid =
+            G.insertString 0 0
+                "ERROR: failed to init test Grid"
+                (G.repeatCell 12 4 Ce.genericCell)
 
         stack =
             Maybe.withDefault
-                genericGrid
+                errorGrid
                 (G.combineVert G.helloGrid G.helloGrid)
 
         newStack =
           G.setCell 2 1 Ce.genericCell stack
     in
     Maybe.withDefault
-        genericGrid
+        errorGrid
         (G.combineHor newStack stack)
