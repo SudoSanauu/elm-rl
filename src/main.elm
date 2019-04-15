@@ -92,7 +92,10 @@ testHello =
             Maybe.withDefault
                 genericGrid
                 (G.combineVert G.helloGrid G.helloGrid)
+
+        newStack =
+          G.setCell 2 1 Ce.genericCell stack
     in
     Maybe.withDefault
         genericGrid
-        (G.combineHor stack stack)
+        (G.combineHor newStack stack)

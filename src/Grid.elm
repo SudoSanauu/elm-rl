@@ -5,6 +5,7 @@ module Grid exposing
     , fromRows, fromCols, fromCells
     , validDimension
     , combineHor, combineVert
+    , setCell
     , Grid --TEMPORARY, NEED TO FIGURE OUT HOW TO DO OBFUSCATED TYPES FOR REALZIES
     , helloGrid
     )
@@ -246,6 +247,22 @@ combineHor leftGrid rightGrid =
         Nothing
 
 
+
+-- Grid Modifier
+
+setCell : Int -> Int -> C.Cell -> Grid -> Grid
+setCell x y inCell inGrid =
+    if x < inGrid.width && y < inGrid.height then
+        let
+            index =
+                (y * inGrid.width) + x
+
+            newCells = A.set index inCell inGrid.cells
+        in
+        { inGrid | cells = newCells }
+    
+    else
+        inGrid
 
 -- Grid Consts
 
