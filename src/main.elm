@@ -5,6 +5,7 @@ import Browser
 import Cell as Ce exposing (Cell)
 import Color as Co
 import Grid as G exposing (Grid)
+import Grid.HtmlDisplay as HD
 import Html exposing (Html, button, div, table, td, text, tr)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
@@ -61,36 +62,8 @@ cellView inputCell model=
             "width = " ++ String.fromInt (G.width model.gridThing) ++ 
             " height = " ++ String.fromInt (G.height model.gridThing)
         )
-        , gridDisplay model.gridThing
+        , HD.display model.gridThing
         ]
-
-
-cellDisplay : Cell -> Html msg
-cellDisplay inputCell =
-    td
-        [ style "width" "20px"
-        , style "height" "20px"
-        , style "text-align" "center"
-        , style "font-family" "monospace"
-        , style "background-color" (Co.toCssString inputCell.backgroundColor)
-        , style "color" (Co.toCssString inputCell.symbolColor)
-        ]
-        [ text (String.fromChar inputCell.symbol) ]
-
-
-gridDisplay : Grid -> Html msg
-gridDisplay inGrid =
-    let
-        rowList =
-            A.toList (A.map A.toList (G.rows inGrid))
-
-        rowToTr inRow =
-            tr [] (List.map cellDisplay inRow)
-
-        rowsAsHtml =
-            List.map rowToTr rowList
-    in
-    table [] rowsAsHtml
 
 
 testHello : Grid
@@ -101,7 +74,7 @@ testHello =
 
         genCellRed = 
             { genCell | symbolColor = Co.red }
-            
+
         errorGrid =
             G.insertString 0 0
                 "ERROR: failed to init test Grid"
