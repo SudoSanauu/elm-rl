@@ -5,24 +5,33 @@ import Browser
 import Cell as Ce exposing (Cell)
 import Color as Co
 import Grid as G exposing (Grid)
-import Grid.HtmlDisplay as HD
-import Html exposing (Html, button, div, table, td, text, tr)
-import Html.Attributes exposing (style)
+import Grid.HtmlDisplay exposing (display)
+import Html exposing (Html, button, div, text)
 import Html.Events exposing (onClick)
 
 
 main =
-    Browser.sandbox { init = inital, update = update, view = view }
+    Browser.element
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }
 
-inital =
-    { val = 0
-    , gridThing = (G.insertString 8 1 "12345678902 12 34 6780 1" testHello)
-    }
+init: () -> (Model, Cmd Msg)
+init _ =
+    ( Home
+        { val = 0
+        , gridThing = (G.insertString 8 1 "12345678902 12 34 6780 1" testHello)
+        }
+    , Cmd.none
+    )
 
-type alias Model = 
-    { val : Int
-    , gridThing : Grid
-    }
+type Model = 
+    Home 
+        { val : Int
+        , gridThing : Grid
+        }
 
 type Msg
     = Increment
@@ -30,40 +39,35 @@ type Msg
 
 
 update msg model =
-    case msg of
-        Increment ->
-            { model | val = model.val + 1 }
+    case (msg, model) of
+        (Increment, Home hm) ->
+            (Home { hm | val = hm.val + 1 }, Cmd.none)
 
-        Decrement ->
-            { model | val = model.val - 1 }
+        (Decrement, Home hm) ->
+            (Home { hm | val = hm.val - 1 }, Cmd.none)
 
 
 view model =
-    div []
-        [ button [ onClick Decrement ] [ text "-" ]
-        , div [] [ text (String.fromInt model.val) ]
-        , button [ onClick Increment ] [ text "+" ]
-        , cellView Ce.genericCell model
-        ]
+    case model of
+        Home hm->
+            div []
+                [ button [ onClick Decrement ] [ text "-" ]
+                , div [] [ text (String.fromInt hm.val) ]
+                , button [ onClick Increment ] [ text "+" ]
+                , display testHello
+                , text "BREAK"
+                , display hm.gridThing
+                ]
 
 
 
--- temp for testing
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    case model of
+        Home m ->
+            Sub.none
 
 
-cellView : Cell -> Model -> Html msg
-cellView inputCell model=
-    div []
-        [ text ("Symbol: " ++ String.fromChar inputCell.symbol)
-        , text (" Symbol Color: " ++ Co.toCssString inputCell.symbolColor)
-        , text (" Background Color: " ++ Co.toCssString inputCell.backgroundColor)
-        , gridDisplay testHello
-        , text (
-            "width = " ++ String.fromInt (G.width model.gridThing) ++ 
-            " height = " ++ String.fromInt (G.height model.gridThing)
-        )
-        , HD.display model.gridThing
-        ]
 
 
 testHello : Grid
