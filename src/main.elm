@@ -3,13 +3,13 @@ module Main exposing (..)
 import Array as A
 import Browser
 import Browser.Events exposing (onAnimationFrame)
-import Cell as Ce exposing (Cell)
+import Cell as Ce exposing (Cell, genericCell)
 import Color as Co
 import Grid as G exposing (Grid)
 import Grid.HtmlDisplay exposing (display)
 import Html exposing (Html, button, div, text)
 import Html.Events exposing (onClick)
-import Time exposing (posixToMillis)
+import Time exposing (Posix, posixToMillis, millisToPosix)
 import Task
 
 
@@ -23,7 +23,7 @@ main =
 
 init: () -> (Model, Cmd Msg)
 init _ =
-    ( Home {gridThing = (G.insertString 8 1 "12345678902 12 34 6780 1" testHello)}
+    ( Home {gridThing = (G.insertStringWrap 8 1 "12345678902 12 34 6780 1" testHello)}
     , Cmd.none
     )
 
@@ -31,14 +31,14 @@ type Model
     = Home 
         { gridThing : Grid }
     | GreetingMessage
-        { start : Time.Posix
-        , current : Time.Posix
+        { start : Posix
+        , current : Posix
         }
 
 type Msg
     = ToGreetingMessageStart
-    | NewStartTime Time.Posix
-    | Tick Time.Posix
+    | NewStartTime Posix
+    | Tick Posix
 
 
 update msg model =
@@ -77,8 +77,6 @@ timeOnOpenPage =
     Task.perform NewStartTime Time.now
 
 
-
-
 view model =
     case model of
         Home hm ->
@@ -99,29 +97,32 @@ view model =
                 sString = 
                     " Start: " ++ (String.fromInt s)
 
-                c =
-                    ((posixToMillis gm.current) - s)
-                            // 100
+                elapsedTime =
+                    (posixToMillis gm.current) - s
+
+                curLetter =
+                    elapsedTime // timeFactor
 
                 cString = 
-                    " Current: " ++ (String.fromInt c)
+                    " Current: " ++ (String.fromInt curLetter)
 
                 message = 
-                    String.slice 0 c lorem
+                    if modBy 4 elapsedTime == 0 then
+                        (String.slice 0 (curLetter - 1) ipsem ++ "|")
+                    else
+                        String.slice 0 curLetter ipsem
 
                 messageGrid =
-                    G.insertString 0 0 message bigGrid
-                    
+                    G.insertStringWrap 0 0 message bigGrid
             in
-                    
             div []
                 [ text "Greeting page wowee"
                 , text sString
-                , text cString   
+                , text cString
                 , button
                     [ onClick ToGreetingMessageStart ]
-                    [ text "to Greeting Page" ] 
-                , display messageGrid      
+                    [ text "Start/Restart Message" ] 
+                , display messageGrid 
                 ]
 
 
@@ -136,7 +137,7 @@ testHello =
             { genCell | symbolColor = Co.red }
 
         errorGrid =
-            G.insertString 0 0
+            G.insertStringWrap 0 0
                 "ERROR: failed to init test Grid"
                 (G.repeatCell 12 4 genCellRed)
 
@@ -162,7 +163,7 @@ bigGrid =
             { genCell | symbol = ' ' }
 
     in
-    G.repeatCell 20 20 genEmpty
+    G.repeatCell 30 30 genEmpty
 
 lorem : String
 lorem =
@@ -176,3 +177,33 @@ lorem =
     " of its noisiest authorities insisted on its being received, for good or" ++
     " for evil, in the superlative degree of comparison only."
 
+ipsem : String
+ipsem = 
+    "A spectre is haunting Europe – the spectre of communism. All the powers" ++
+    " of old Europe have entered into a holy alliance to exorcise this " ++
+    "spectre: Pope and Tsar, Metternich and Guizot, French Radicals and " ++
+    " German police-spies. Where is the party in opposition that has not been" ++
+    " decried as communistic by its opponents in" ++
+    " power? Where is the opposition that has not hurled back the branding reproach of communism," ++
+    " against the more advanced opposition parties, as well as against its reactionary adversaries?" ++
+    " Two things result from this fact:" ++
+    " I. Communism is already acknowledged by all European powers to be itself a" ++
+    " power." ++
+    " II. It is high time that Communists should openly, in the face of the whole world," ++
+    " publish their views, their aims, their tendencies, and meet this nursery tale of the" ++
+    " Spectre of Communism with a manifesto of the party itself." ++
+    " To this end, Communists of various nationalities have assembled in London and sketched the" ++
+    " following manifesto, to be published in the English, French, German, Italian, Flemish and Danish" ++
+    " languages."
+
+
+timeFactor : Int
+timeFactor =
+    75 --milliseconds
+
+setCellFlat index inCell inGrid =
+    let
+        x = modBy (G.width inGrid) index
+        y = index // (G.width inGrid)
+    in
+    G.setCell x y inCell inGrid

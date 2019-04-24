@@ -5,12 +5,14 @@ module Grid exposing
     , rows, columns, cells, getCell
     , validDimension
     , combineHor, combineVert
-    , setCell, insertString
+    , setCell, setCellSymbol, setCellSymbolColor, setCellBackgroundColor
+    , insertStringWrap --, insertCellsWrap
     , helloGrid
     )
 
-import Array as A
-import Cell as C
+import Array as A exposing (Array)
+import Cell as C exposing (Cell)
+import Color exposing (Color)
 import String as S exposing (length)
 
 
@@ -20,7 +22,7 @@ type Grid =
     Grid
         { width : Int
         , height : Int
-        , cells : A.Array C.Cell
+        , cells : Array Cell
         }
 
 
@@ -28,7 +30,7 @@ type Grid =
 -- Initialization
 
 
-repeatCell : Int -> Int -> C.Cell -> Grid
+repeatCell : Int -> Int -> Cell -> Grid
 repeatCell w h copyCell =
     Grid
         { width = w
@@ -37,7 +39,7 @@ repeatCell w h copyCell =
         }
 
 
-fromRows : A.Array (A.Array C.Cell) -> Maybe Grid
+fromRows : Array (Array Cell) -> Maybe Grid
 fromRows arr =
     let
         h =
@@ -65,7 +67,7 @@ fromRows arr =
         Nothing
 
 
-fromCols : A.Array (A.Array C.Cell) -> Maybe Grid
+fromCols : Array (Array Cell) -> Maybe Grid
 fromCols inputArr =
     let
         w =
@@ -109,7 +111,7 @@ fromCols inputArr =
         Nothing
 
 
-fromCells : Int -> Int -> A.Array C.Cell -> Maybe Grid
+fromCells : Int -> Int -> Array Cell -> Maybe Grid
 fromCells w h arr =
     if validDimension w h arr then
         Just
@@ -155,7 +157,7 @@ numCells inGrid =
 -- Accessing Cells
 
 
-rows : Grid -> A.Array (A.Array C.Cell)
+rows : Grid -> Array (Array Cell)
 rows inGrid =
     case inGrid of 
         Grid g ->
@@ -169,7 +171,7 @@ rows inGrid =
             A.map (\x -> sepRows x g.cells) useArray
 
 
-columns : Grid -> A.Array (A.Array C.Cell)
+columns : Grid -> Array (Array Cell)
 columns inGrid =
     case inGrid of 
         Grid g ->
@@ -189,7 +191,7 @@ columns inGrid =
             A.map indexesToCells colsIndexs
 
 
-getCell : Int -> Int -> Grid -> Maybe C.Cell
+getCell : Int -> Int -> Grid -> Maybe Cell
 getCell x y inGrid =
     case inGrid of 
         Grid g ->
@@ -200,7 +202,7 @@ getCell x y inGrid =
             A.get index g.cells
 
 
-cells : Grid -> A.Array C.Cell
+cells : Grid -> Array Cell
 cells inGrid =
     case inGrid of 
         Grid g ->
@@ -211,7 +213,7 @@ cells inGrid =
 -- Helper
 
 
-validDimension : Int -> Int -> A.Array a -> Bool
+validDimension : Int -> Int -> Array a -> Bool
 validDimension w h arr =
     let
         pos =
@@ -286,30 +288,97 @@ combineHor leftGrid rightGrid =
 -- Grid Modifier
 
 
-setCell : Int -> Int -> C.Cell -> Grid -> Grid
+setCell : Int -> Int -> Cell -> Grid -> Grid
 setCell x y inCell inGrid =
     case inGrid of 
         Grid g ->
-            if x < g.width && y < g.height then
-                let
-                    index =
-                        (y * g.width) + x
+            let
+                index =
+                    (y * g.width) + x
 
-                    newCells =
-                        A.set index inCell g.cells
-                in
-                Grid { g | cells = newCells }
+                newCells =
+                    A.set index inCell g.cells
+            in
+            Grid { g | cells = newCells }
+
+
+setCellSymbol : Int -> Int -> Char -> Grid -> Grid
+setCellSymbol x y newChar inGrid =
+    case inGrid of 
+        Grid g ->
+            let
+                index =
+                    (y * g.width) + x
+
+                oldCell =
+                    A.get index g.cells
+
+                newCells =
+                    case oldCell of
+                        Nothing ->
+                            g.cells
+
+                        Just c ->
+                            A.set index (C.setSymbol newChar c) g.cells
+            in
+            Grid { g | cells = newCells }
+
+
+setCellSymbolColor : Int -> Int -> Color -> Grid -> Grid
+setCellSymbolColor x y newColor inGrid =
+    case inGrid of 
+        Grid g ->
+            let
+                index =
+                    (y * g.width) + x
+
+                oldCell =
+                    A.get index g.cells
             
-            else
-                inGrid
+                newCells =
+                    case oldCell of
+                        Nothing ->
+                            g.cells
+
+                        Just c ->
+                            A.set index (C.setSymbolColor newColor c) g.cells
+            in
+            Grid { g | cells = newCells }
+
+setCellBackgroundColor : Int -> Int -> Color -> Grid -> Grid
+setCellBackgroundColor x y newColor inGrid =
+    case inGrid of 
+        Grid g ->
+            let
+                index =
+                    (y * g.width) + x
+
+                oldCell =
+                    A.get index g.cells
+
+                newCells =
+                    case oldCell of
+                        Nothing ->
+                            g.cells
+
+                        Just c ->
+                            A.set index (C.setBackgroundColor newColor c) g.cells
+            in
+            Grid { g | cells = newCells }
 
 
-insertString : Int -> Int -> String -> Grid -> Grid
-insertString x y inString inGrid =
+insertStringWrap : Int -> Int -> String -> Grid -> Grid
+insertStringWrap x y inString inGrid =
     case inGrid of 
         Grid g ->
             insertHelper x y "" (S.words inString) inGrid
 
+
+--insertCellsWrap : Int -> Int -> Array Cell -> Grid -> Grid
+--insertCellsWrap x y cellWords inGrid =
+--    case inGrid of
+--        Grid g ->
+--            inGrid -- TO DO!!!!!!!!!!!!
 
 
 -- Grid Consts
@@ -341,7 +410,7 @@ helloGrid =
 
 
 -- use only when we don't need to use default, since we do type safety on Grid
-safeGet : Int -> Grid -> C.Cell
+safeGet : Int -> Grid -> Cell
 safeGet index inGrid =
     case inGrid of 
         Grid g ->
@@ -447,7 +516,7 @@ setWord index word inGrid =
                                         (A.get i inArr)
 
                                 newCell =
-                                    { currCell | symbol = inChar }
+                                    C.setSymbol inChar currCell
 
                                 newArr = 
                                     A.set i newCell inArr
