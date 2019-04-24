@@ -1,12 +1,15 @@
-module Cell exposing (Cell, genericCell)
+module Cell exposing
+    ( Cell, genericCell
+    , setSymbol, setSymbolColor, setBackgroundColor
+    )
 
-import Color as C
+import Color as C exposing (Color) 
 
 
 type alias Cell =
     { symbol : Char
-    , symbolColor : C.Color
-    , backgroundColor : C.Color
+    , symbolColor : Color
+    , backgroundColor : Color
     }
 
 
@@ -16,3 +19,16 @@ genericCell =
     , symbolColor = C.white
     , backgroundColor = C.black
     }
+
+setSymbol : Char -> Cell -> Cell
+setSymbol newChar inCell =
+    { inCell | symbol = newChar }
+
+
+setSymbolColor : Color -> Cell -> Cell
+setSymbolColor newColor inCell =
+    { inCell | symbolColor = newColor }
+
+setBackgroundColor : Color -> Cell -> Cell
+setBackgroundColor newColor inCell =
+    { inCell | backgroundColor = newColor }
