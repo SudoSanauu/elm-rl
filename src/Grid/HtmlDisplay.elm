@@ -29,8 +29,8 @@ tableCell inCell =
         cellStyle =
             [ style "text-align" "center"
             , style "font-family" "monospace"
-            , style "width" "20px"
-            , style "height" "20px"
+            , style "width" "16px"
+            , style "height" "16px"
             , style "padding" "0"
             , style "background-color" (toCssString inCell.backgroundColor)
             , style "color" (toCssString inCell.symbolColor)
